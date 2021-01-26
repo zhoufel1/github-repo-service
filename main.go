@@ -1,15 +1,36 @@
 package main
 
 import (
-	"fmt"
-	"github.com/zhoufel1/github-projects-service/internal/fetch"
+	// "fmt"
 	"log"
+	// "os"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	repos, err := fetch.RequestRepos("zhoufel1")
+	err := godotenv.Load()
 	if err != nil {
 		log.Fatal(err)
+		return
 	}
-	fmt.Println(repos[1].FullName)
+
+	// username, present := os.LookupEnv("GITHUB_USERNAME")
+	// if !present {
+	// 	log.Fatal("GITHUB_USERNAME not set ")
+	// }
+	// repos, err := fetch.RequestRepos(username)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// 	return
+	// }
+
+	// storeHandler, err := store.NewRepoStore()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// results := storeHandler.Retrieve()
+	// for _, repo := range results {
+	// 	fmt.Println(repo.FullName)
+	// }
 }
