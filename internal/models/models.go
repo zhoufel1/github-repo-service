@@ -1,4 +1,4 @@
-package main
+package models
 
 // Repository contains relevant data from Github repo API response
 type Repository struct {
@@ -10,4 +10,8 @@ type Repository struct {
 	UpdatedAt   string  `json:"updated_at"`
 	PushedAt    string  `json:"pushed_at"`
 	Language    *string `json:"language"`
+}
+
+type InitialFetchCheck struct {
+	Fetched bool
 }
