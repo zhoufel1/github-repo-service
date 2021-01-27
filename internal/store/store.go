@@ -9,9 +9,10 @@ import (
 	"os"
 )
 
-// Store contains functions for working with the database
-type Store struct {
-	db *gorm.DB
+// ReposDB contains functions for working with the database
+type ReposDB struct {
+	db            *gorm.DB
+	IsInitialized bool
 }
 
 func generateDSN() string {
@@ -25,41 +26,36 @@ func generateDSN() string {
 	)
 }
 
-// NewStore creates a new Store struct
-func NewStore() (*Store, error) {
+// NewReposDB creates a new Store struct
+func NewReposDB() (*ReposDB, error) {
 	dsn := generateDSN()
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
-	db.AutoMigrate(&models.Repository{}, &models.InitialFetchCheck{})
-	fetched := models.InitialFetchCheck{}
-	err = db.First(&fetched).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		db.Create(&models.InitialFetchCheck{Fetched: false})
+	db.AutoMigrate(&models.Repository{}, &models.InitializationCache{})
+
+	initCache := models.InitializationCache{}
+	err = db.First(&initCache).Error
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		db.Create(&models.InitializationCache{IsInitialized: false})
+		return &ReposDB{db: db, IsInitialized: false}, nil
 	}
-	return &Store{db}, nil
+	if !initCache.IsInitialized {
+		return &ReposDB{db: db, IsInitialized: false}, nil
+	}
+	return &ReposDB{db: db, IsInitialized: true}, nil
 }
 
-func (s Store) IsInitiallyFetched() bool {
-	fetched := models.InitialFetchCheck{}
+func (s ReposDB) Initialize(repos []models.Repository) {
+	var fetched models.InitializationCache
 	s.db.First(&fetched)
-	return fetched.Fetched
-}
-
-func (s Store) SetFetched() {
-	var fetched models.InitialFetchCheck
-	s.db.First(&fetched)
-	s.db.Model(&fetched).Where("fetched = ?", false).Update("fetched", true)
-}
-
-// Create
-func (s Store) Create(repos []models.Repository) {
+	s.db.Model(&fetched).Where("is_initialized = ?", false).Update("is_initialized", true)
 	s.db.Create(&repos)
 }
 
-// Retrieve
-func (s Store) Retrieve() []models.Repository {
+// RetrieveRepos
+func (s ReposDB) RetrieveRepos() []models.Repository {
 	repos := []models.Repository{}
 	s.db.Find(&repos)
 	return repos

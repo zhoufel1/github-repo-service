@@ -12,6 +12,6 @@ type Repository struct {
 	Language    *string `json:"language"`
 }
 
-type InitialFetchCheck struct {
-	Fetched bool
+type InitializationCache struct {
+	IsInitialized bool
 }
