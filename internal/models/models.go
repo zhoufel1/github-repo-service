@@ -16,3 +16,8 @@ type Repository struct {
 type InitCache struct {
 	IsInitialized bool
 }
+
+type ResponseJSON struct {
+	Code    uint
+	Message string
+}

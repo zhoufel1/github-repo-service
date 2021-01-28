@@ -13,12 +13,24 @@ import (
 func getReposHandler(c *gin.Context) {
 	db, err := store.NewRepoDB()
 	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			models.ResponseJSON{
+				Code:    500,
+				Message: "Failed to connect to database.",
+			})
 		log.Fatal(err)
 	}
 	var repos []models.Repository
 	if !db.IsInitialized {
 		repos, err := fetchRepos()
 		if err != nil {
+			c.JSON(
+				http.StatusInternalServerError,
+				models.ResponseJSON{
+					Code:    500,
+					Message: "Failed to fetch repos.",
+				})
 			log.Fatal(err)
 		}
 		db.Initialize(repos)
@@ -30,13 +42,31 @@ func getReposHandler(c *gin.Context) {
 func updateReposHandler(c *gin.Context) {
 	db, err := store.NewRepoDB()
 	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			models.ResponseJSON{
+				Code:    500,
+				Message: "Failed to connect to database.",
+			})
 		log.Fatal(err)
 	}
 	repos, err := fetchRepos()
 	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			models.ResponseJSON{
+				Code:    500,
+				Message: "Failed to fetch repos.",
+			})
 		log.Fatal(err)
 	}
 	db.UpdateRepos(repos)
+	c.JSON(
+		http.StatusOK,
+		models.ResponseJSON{
+			Code:    200,
+			Message: "Repositories successfully updated.",
+		})
 
 }
 
