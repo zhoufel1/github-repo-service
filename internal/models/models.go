@@ -17,6 +17,7 @@ type InitCache struct {
 	IsInitialized bool
 }
 
+// ResponseJSON contains data for responses
 type ResponseJSON struct {
 	Code    uint
 	Message string
