@@ -19,7 +19,7 @@ func getReposHandler(c *gin.Context) {
 	}
 	var repos []models.Repository
 	if !db.IsInitialized {
-		repos, err := performInitialPull(db)
+		repos, err := fetchRepos()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -30,13 +30,19 @@ func getReposHandler(c *gin.Context) {
 }
 
 func updateReposHandler(c *gin.Context) {
-	_, err := store.NewReposDB()
+	db, err := store.NewReposDB()
 	if err != nil {
 		log.Fatal(err)
 	}
+	repos, err := fetchRepos()
+	if err != nil {
+		log.Fatal(err)
+	}
+	db.UpdateRepos(repos)
+
 }
 
-func performInitialPull(store *store.ReposDB) ([]models.Repository, error) {
+func fetchRepos() ([]models.Repository, error) {
 	username := os.Getenv("GITHUB_USERNAME")
 	repos, err := fetch.RequestRepos(username)
 	if err != nil {

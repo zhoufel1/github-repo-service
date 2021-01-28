@@ -47,16 +47,23 @@ func NewReposDB() (*ReposDB, error) {
 	return &ReposDB{db: db, IsInitialized: true}, nil
 }
 
-func (s ReposDB) Initialize(repos []models.Repository) {
+func (d ReposDB) Initialize(repos []models.Repository) {
 	var fetched models.InitializationCache
-	s.db.First(&fetched)
-	s.db.Model(&fetched).Where("is_initialized = ?", false).Update("is_initialized", true)
-	s.db.Create(&repos)
+	d.db.First(&fetched)
+	d.db.Model(&fetched).Where("is_initialized = ?", false).Update("is_initialized", true)
+	d.db.Create(&repos)
 }
 
 // RetrieveRepos
-func (s ReposDB) RetrieveRepos() []models.Repository {
+func (d ReposDB) RetrieveRepos() []models.Repository {
 	repos := []models.Repository{}
-	s.db.Find(&repos)
+	d.db.Find(&repos)
 	return repos
+}
+
+func (d ReposDB) UpdateRepos(new []models.Repository) {
+	current := []models.Repository{}
+	d.db.Find(&current)
+	d.db.Delete(&current)
+	d.db.Create(&new)
 }
