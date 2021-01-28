@@ -2,9 +2,8 @@ package main
 
 import (
 	"github-repo-service/internal/routes"
-	"log"
-
 	"github.com/joho/godotenv"
+	"log"
 )
 
 func main() {

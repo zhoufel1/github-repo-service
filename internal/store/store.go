@@ -9,8 +9,8 @@ import (
 	"os"
 )
 
-// ReposDB contains functions for working with the database
-type ReposDB struct {
+// RepoDB handler for database operations
+type RepoDB struct {
 	db            *gorm.DB
 	IsInitialized bool
 }
@@ -26,42 +26,45 @@ func generateDSN() string {
 	)
 }
 
-// NewReposDB creates a new Store struct
-func NewReposDB() (*ReposDB, error) {
+// NewRepoDB create a new RepoDB
+func NewRepoDB() (*RepoDB, error) {
 	dsn := generateDSN()
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
-	db.AutoMigrate(&models.Repository{}, &models.InitializationCache{})
 
-	initCache := models.InitializationCache{}
+	db.AutoMigrate(&models.Repository{}, &models.InitCache{})
+
+	initCache := models.InitCache{}
 	err = db.First(&initCache).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		db.Create(&models.InitializationCache{IsInitialized: false})
-		return &ReposDB{db: db, IsInitialized: false}, nil
+		db.Create(&models.InitCache{IsInitialized: false})
+		fmt.Println(initCache.IsInitialized)
 	}
 	if !initCache.IsInitialized {
-		return &ReposDB{db: db, IsInitialized: false}, nil
+		return &RepoDB{db: db, IsInitialized: false}, nil
 	}
-	return &ReposDB{db: db, IsInitialized: true}, nil
+	return &RepoDB{db: db, IsInitialized: true}, nil
 }
 
-func (d ReposDB) Initialize(repos []models.Repository) {
-	var fetched models.InitializationCache
+// Initialize store data from initial fetch
+func (d RepoDB) Initialize(repos []models.Repository) {
+	var fetched models.InitCache
 	d.db.First(&fetched)
 	d.db.Model(&fetched).Where("is_initialized = ?", false).Update("is_initialized", true)
 	d.db.Create(&repos)
 }
 
-// RetrieveRepos
-func (d ReposDB) RetrieveRepos() []models.Repository {
+// RetrieveRepos retrieve data from store
+func (d RepoDB) RetrieveRepos() []models.Repository {
 	repos := []models.Repository{}
 	d.db.Find(&repos)
 	return repos
 }
 
-func (d ReposDB) UpdateRepos(new []models.Repository) {
+// UpdateRepos update database entries
+func (d RepoDB) UpdateRepos(new []models.Repository) {
 	current := []models.Repository{}
 	d.db.Find(&current)
 	d.db.Delete(&current)

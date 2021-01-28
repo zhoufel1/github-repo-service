@@ -4,16 +4,14 @@ import (
 	"github-repo-service/internal/fetch"
 	"github-repo-service/internal/models"
 	"github-repo-service/internal/store"
-	"log"
-
 	"github.com/gin-gonic/gin"
-
+	"log"
 	"net/http"
 	"os"
 )
 
 func getReposHandler(c *gin.Context) {
-	db, err := store.NewReposDB()
+	db, err := store.NewRepoDB()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -30,7 +28,7 @@ func getReposHandler(c *gin.Context) {
 }
 
 func updateReposHandler(c *gin.Context) {
-	db, err := store.NewReposDB()
+	db, err := store.NewRepoDB()
 	if err != nil {
 		log.Fatal(err)
 	}
