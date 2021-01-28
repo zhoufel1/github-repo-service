@@ -1,0 +1,29 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    volumes: 
+      - github-projs:/home/app
+    ports: 
+      - "5001:8080"
+    links:
+      - "db:database"
+    depends_on:
+      - "db"
+  db:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile-db
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=test
+      - MYSQL_DATABASE=github_projects
+    volumes: 
+      - github-projs:/home/app
+    ports:
+      - "3306:3306"
+    expose:
+      - "3306"
+volumes:
+  github-projs:
